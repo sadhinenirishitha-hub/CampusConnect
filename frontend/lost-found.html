@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusConnect - Lost & Found</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h2>CampusConnect</h2>
+    <a href="dashboard.html">Back to Dashboard</a>
+</header>
+
+<main class="dashboard">
+    <h1>Lost & Found 🔎</h1>
+    <p>Help reunite lost belongings with their owners.</p>
+
+    <div class="dashboard-card">
+        <h2>Report an Item</h2>
+
+        <form id="lostForm">
+            <input type="text" id="itemName"
+                placeholder="Item Name" required>
+
+            <select id="itemStatus" required>
+                <option value="">Select Status</option>
+                <option value="Lost">Lost</option>
+                <option value="Found">Found</option>
+            </select>
+
+            <input type="text" id="itemLocation"
+                placeholder="Location" required>
+
+            <textarea id="itemDescription"
+                placeholder="Item Description" required></textarea>
+
+            <button type="submit">Submit Report</button>
+        </form>
+
+        <p id="lostMessage"></p>
+    </div>
+
+    <h2 style="margin-top:35px;">Reported Items</h2>
+    <div id="lostList" class="dashboard-grid"></div>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

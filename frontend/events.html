@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusConnect - Events</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h2>CampusConnect</h2>
+    <a href="dashboard.html">Back to Dashboard</a>
+</header>
+
+<main class="dashboard">
+    <h1>Campus Events 🎉</h1>
+    <p>Discover what's happening around your campus.</p>
+
+    <div class="dashboard-grid">
+
+        <div class="dashboard-card">
+            <h2>💻 Tech Fest 2026</h2>
+            <p>Explore technology, coding and innovation.</p>
+            <p><strong>Date:</strong> December 10, 2026</p>
+            <button onclick="registerEvent('Tech Fest 2026')">
+                I'm Interested
+            </button>
+        </div>
+
+        <div class="dashboard-card">
+            <h2>🎤 Cultural Fest</h2>
+            <p>Celebrate music, dance and creativity.</p>
+            <p><strong>Date:</strong> December 15, 2026</p>
+            <button onclick="registerEvent('Cultural Fest')">
+                I'm Interested
+            </button>
+        </div>
+
+        <div class="dashboard-card">
+            <h2>🤖 AI Workshop</h2>
+            <p>Learn about artificial intelligence.</p>
+            <p><strong>Date:</strong> December 20, 2026</p>
+            <button onclick="registerEvent('AI Workshop')">
+                I'm Interested
+            </button>
+        </div>
+
+    </div>
+
+    <p id="eventMessage"></p>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
