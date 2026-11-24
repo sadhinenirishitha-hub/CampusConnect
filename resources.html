@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusConnect - Study Resources</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h2>CampusConnect</h2>
+    <a href="dashboard.html">Back to Dashboard</a>
+</header>
+
+<main class="dashboard">
+    <h1>Study Resources 📚</h1>
+    <p>Share knowledge. Learn together.</p>
+
+    <div class="dashboard-card">
+        <h2>Share a Resource</h2>
+
+        <form id="resourceForm">
+            <input type="text" id="resourceTitle"
+                placeholder="Resource Title" required>
+
+            <select id="resourceSubject" required>
+                <option value="">Select Subject</option>
+                <option>DSA</option>
+                <option>DBMS</option>
+                <option>Digital Logic Design</option>
+                <option>Artificial Intelligence</option>
+                <option>Mathematics</option>
+            </select>
+
+            <input type="url" id="resourceLink"
+                placeholder="Paste resource link (https://...)" required>
+
+            <button type="submit">Share Resource</button>
+        </form>
+
+        <p id="resourceMessage"></p>
+    </div>
+
+    <h2 style="margin-top:35px;">Available Resources</h2>
+
+    <div id="resourceList" class="dashboard-grid"></div>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

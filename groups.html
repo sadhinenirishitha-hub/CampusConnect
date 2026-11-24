@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusConnect - Study Groups</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h2>CampusConnect</h2>
+    <a href="dashboard.html">Back to Dashboard</a>
+</header>
+
+<main class="dashboard">
+    <h1>Study Groups 👥</h1>
+    <p>Find people to learn and grow with.</p>
+
+    <div class="dashboard-card">
+        <h2>Create a Study Group</h2>
+
+        <form id="groupForm">
+            <input type="text" id="groupName"
+                placeholder="Group Name" required>
+
+            <input type="text" id="groupSubject"
+                placeholder="Subject" required>
+
+            <button type="submit">Create Group</button>
+        </form>
+
+        <p id="groupMessage"></p>
+    </div>
+
+    <h2 style="margin-top:35px;">Available Groups</h2>
+    <div id="groupList" class="dashboard-grid"></div>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

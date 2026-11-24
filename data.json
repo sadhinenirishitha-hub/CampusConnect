@@ -1,0 +1,20 @@
+{
+  "resources": [
+    {
+      "title": "QB",
+      "subject": "DSA",
+      "link": "https://www.google.com",
+      "id": "796fb2c5-12b2-4463-a7aa-11725b4b8eb3"
+    }
+  ],
+  "groups": [],
+  "lostItems": [
+    {
+      "name": "Bottle",
+      "status": "Lost",
+      "location": "Arena",
+      "description": "Blue colour",
+      "id": "68df2ed7-d310-4287-a692-bd867a9c1520"
+    }
+  ]
+}
