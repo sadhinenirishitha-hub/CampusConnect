@@ -33,7 +33,7 @@ if (registerForm) {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/register",
+                "https://campus-connect-oea4.onrender.com/api/register",
                 {
                     method: "POST",
                     headers: {
@@ -77,7 +77,7 @@ if (loginForm) {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/login",
+                "https://campus-connect-oea4.onrender.com",
                 {
                     method: "POST",
                     headers: {
@@ -164,7 +164,7 @@ async function displayResources() {
 
     try {
         const response = await fetch(
-            "http://localhost:5000/api/resources"
+            "https://campus-connect-oea4.onrender.com",
         );
 
         const resources = await response.json();
@@ -211,7 +211,7 @@ if (resourceForm) {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/resources",
+                "https://campus-connect-oea4.onrender.com",
                 {
                     method: "POST",
                     headers: {
@@ -255,7 +255,7 @@ async function displayGroups() {
 
     try {
         const response = await fetch(
-            "http://localhost:5000/api/groups"
+            "https://campus-connect-oea4.onrender.com"
         );
 
         const groups = await response.json();
@@ -295,7 +295,7 @@ if (groupForm) {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/groups",
+                "https://campus-connect-oea4.onrender.com",
                 {
                     method: "POST",
                     headers: {
@@ -339,7 +339,7 @@ async function displayLostItems() {
 
     try {
         const response = await fetch(
-            "http://localhost:5000/api/lost-items"
+            "https://campus-connect-oea4.onrender.com"
         );
 
         const items = await response.json();
@@ -387,7 +387,7 @@ if (lostForm) {
 
         try {
             const response = await fetch(
-                "http://localhost:5000/api/lost-items",
+                "https://campus-connect-oea4.onrender.com",
                 {
                     method: "POST",
                     headers: {
@@ -427,10 +427,10 @@ async function loadAdminStats() {
         const [usersResponse, resourcesResponse,
             groupsResponse, itemsResponse] = await Promise.all([
 
-            fetch("http://localhost:5000/api/admin/stats"),
-            fetch("http://localhost:5000/api/resources"),
-            fetch("http://localhost:5000/api/groups"),
-            fetch("http://localhost:5000/api/lost-items")
+            fetch("https://campus-connect-oea4.onrender.com"),
+            fetch("https://campus-connect-oea4.onrender.com"),
+            fetch("https://campus-connect-oea4.onrender.com"),
+            fetch("https://campus-connect-oea4.onrender.com")
 
         ]);
 

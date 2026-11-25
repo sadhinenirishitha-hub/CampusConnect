@@ -3,265 +3,266 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
-const db = path.join(__dirname, "users.json");
+const usersFile = path.join(__dirname, "users.json");
 const dataFile = path.join(__dirname, "data.json");
 
-if (!fs.existsSync(db)) {
-    fs.writeFileSync(db, "[]");
+function initializeFile(file, defaultData) {
+    if (!fs.existsSync(file)) {
+        fs.writeFileSync(file, JSON.stringify(defaultData, null, 2));
+    }
 }
 
-if (!fs.existsSync(dataFile)) {
-    fs.writeFileSync(dataFile, JSON.stringify({
-        resources: [],
-        groups: [],
-        lostItems: []
-    }, null, 2));
+initializeFile(usersFile, []);
+
+initializeFile(dataFile, {
+    resources: [],
+    groups: [],
+    lostItems: []
+});
+
+function readJSON(file) {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
-const server = http.createServer((req, res) => {
+function writeJSON(file, data) {
+    fs.writeFileSync(file, JSON.stringify(data, null, 2));
+}
+
+function send(res, status, data) {
+    res.writeHead(status, {
+        "Content-Type": "application/json"
+    });
+
+    res.end(JSON.stringify(data));
+}
+
+function readBody(req) {
+    return new Promise((resolve, reject) => {
+        let body = "";
+
+        req.on("data", chunk => {
+            body += chunk;
+
+            if (body.length > 1000000) {
+                reject(new Error("Request too large"));
+            }
+        });
+
+        req.on("end", () => {
+            try {
+                resolve(JSON.parse(body));
+            } catch (error) {
+                reject(error);
+            }
+        });
+
+        req.on("error", reject);
+    });
+}
+
+const routes = {
+    "/api/resources": "resources",
+    "/api/groups": "groups",
+    "/api/lost-items": "lostItems"
+};
+
+const server = http.createServer(async (req, res) => {
 
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-    res.setHeader("Content-Type", "application/json");
 
     if (req.method === "OPTIONS") {
         res.writeHead(204);
         return res.end();
     }
 
-    // Homepage
-    if (req.url === "/" && req.method === "GET") {
-        res.writeHead(200);
-        return res.end(JSON.stringify({
-            message: "CampusConnect Backend Working!"
-        }));
-    }
+    const url = new URL(req.url, "http://localhost");
+    const route = url.pathname;
 
-    // Registration
-    if (req.url === "/api/register" && req.method === "POST") {
+    try {
 
-        let body = "";
-
-        req.on("data", chunk => body += chunk);
-
-        req.on("end", () => {
-            try {
-                const { name, email, usn, department, password } =
-                    JSON.parse(body);
-
-                if (!name || !email || !usn || !department || !password) {
-                    res.writeHead(400);
-                    return res.end(JSON.stringify({
-                        message: "All fields are required."
-                    }));
-                }
-
-                if (password.length < 8) {
-                    res.writeHead(400);
-                    return res.end(JSON.stringify({
-                        message: "Password must be at least 8 characters."
-                    }));
-                }
-
-                const users = JSON.parse(fs.readFileSync(db, "utf8"));
-
-                if (users.some(u =>
-                    u.email.toLowerCase() === email.toLowerCase()
-                )) {
-                    res.writeHead(409);
-                    return res.end(JSON.stringify({
-                        message: "Email already registered."
-                    }));
-                }
-
-                const salt = crypto.randomBytes(16).toString("hex");
-
-                const hashedPassword = crypto.scryptSync(
-                    password, salt, 64
-                ).toString("hex");
-
-                users.push({
-                    id: crypto.randomUUID(),
-                    name,
-                    email,
-                    usn,
-                    department,
-                    salt,
-                    password: hashedPassword
-                });
-
-                fs.writeFileSync(db, JSON.stringify(users, null, 2));
-
-                res.writeHead(201);
-                res.end(JSON.stringify({
-                    message: "Registration successful!"
-                }));
-
-            } catch (error) {
-                res.writeHead(400);
-                res.end(JSON.stringify({
-                    message: "Invalid registration data."
-                }));
-            }
-        });
-
-        return;
-    }
-
-    // Login
-    if (req.url === "/api/login" && req.method === "POST") {
-
-        let body = "";
-
-        req.on("data", chunk => body += chunk);
-
-        req.on("end", () => {
-            try {
-                const { email, password } = JSON.parse(body);
-
-                if (!email || !password) {
-                    res.writeHead(400);
-                    return res.end(JSON.stringify({
-                        success: false,
-                        message: "Email and password are required."
-                    }));
-                }
-
-                const users = JSON.parse(fs.readFileSync(db, "utf8"));
-
-                const user = users.find(u =>
-                    u.email.toLowerCase() === email.toLowerCase()
-                );
-
-                if (!user) {
-                    res.writeHead(404);
-                    return res.end(JSON.stringify({
-                        success: false,
-                        message: "Account not found."
-                    }));
-                }
-
-                const hashedPassword = crypto.scryptSync(
-                    password, user.salt, 64
-                ).toString("hex");
-
-                if (hashedPassword !== user.password) {
-                    res.writeHead(401);
-                    return res.end(JSON.stringify({
-                        success: false,
-                        message: "Incorrect password."
-                    }));
-                }
-
-                res.writeHead(200);
-                res.end(JSON.stringify({
-                    success: true,
-                    message: "Login successful!",
-                    name: user.name
-                }));
-
-            } catch (error) {
-                res.writeHead(400);
-                res.end(JSON.stringify({
-                    success: false,
-                    message: "Invalid login data."
-                }));
-            }
-        });
-
-        return;
-    }
-
-    // Admin statistics - prototype only
-    if (req.url === "/api/admin/stats" && req.method === "GET") {
-
-        const users = JSON.parse(fs.readFileSync(db, "utf8"));
-
-        res.writeHead(200);
-        return res.end(JSON.stringify({
-            students: users.length
-        }));
-    }
-
-    // Shared resources, groups and lost-and-found
-    const dataRoutes = {
-        "/api/resources": "resources",
-        "/api/groups": "groups",
-        "/api/lost-items": "lostItems"
-    };
-
-    const collection = dataRoutes[req.url];
-
-    if (collection) {
-
-        const data = JSON.parse(fs.readFileSync(dataFile, "utf8"));
-
-        if (req.method === "GET") {
-            res.writeHead(200);
-            return res.end(JSON.stringify(data[collection]));
+        // HOME
+        if (route === "/" && req.method === "GET") {
+            return send(res, 200, {
+                message: "CampusConnect Backend Working!"
+            });
         }
 
-        if (req.method === "POST") {
+        // REGISTER
+        if (route === "/api/register" && req.method === "POST") {
 
-            let body = "";
+            const { name, email, usn, department, password } =
+                await readBody(req);
 
-            req.on("data", chunk => body += chunk);
+            if (!name || !email || !usn || !department || !password) {
+                return send(res, 400, {
+                    message: "All fields are required."
+                });
+            }
 
-            req.on("end", () => {
-                try {
-                    const item = JSON.parse(body);
+            if (password.length < 8) {
+                return send(res, 400, {
+                    message: "Password must be at least 8 characters."
+                });
+            }
 
-                    if (!item || typeof item !== "object" ||
-                        Array.isArray(item)) {
-                        res.writeHead(400);
-                        return res.end(JSON.stringify({
-                            message: "Invalid data."
-                        }));
-                    }
+            const users = readJSON(usersFile);
 
-                    data[collection].push({
-                        ...item,
-                        id: crypto.randomUUID()
-                    });
+            if (users.some(user =>
+                user.email.toLowerCase() === email.toLowerCase()
+            )) {
+                return send(res, 409, {
+                    message: "Email already registered."
+                });
+            }
 
-                    fs.writeFileSync(
-                        dataFile,
-                        JSON.stringify(data, null, 2)
-                    );
+            const salt = crypto.randomBytes(16).toString("hex");
 
-                    res.writeHead(201);
-                    res.end(JSON.stringify({
-                        message: "Data saved successfully!"
-                    }));
+            const hashedPassword = crypto.scryptSync(
+                password,
+                salt,
+                64
+            ).toString("hex");
 
-                } catch (error) {
-                    res.writeHead(400);
-                    res.end(JSON.stringify({
-                        message: "Invalid request data."
-                    }));
-                }
+            users.push({
+                id: crypto.randomUUID(),
+                name,
+                email,
+                usn,
+                department,
+                salt,
+                password: hashedPassword
             });
 
-            return;
+            writeJSON(usersFile, users);
+
+            return send(res, 201, {
+                message: "Registration successful!"
+            });
         }
 
-        res.writeHead(405);
-        return res.end(JSON.stringify({
-            message: "Method not allowed."
-        }));
+        // LOGIN
+        if (route === "/api/login" && req.method === "POST") {
+
+            const { email, password } = await readBody(req);
+
+            if (!email || !password) {
+                return send(res, 400, {
+                    success: false,
+                    message: "Email and password are required."
+                });
+            }
+
+            const users = readJSON(usersFile);
+
+            const user = users.find(item =>
+                item.email.toLowerCase() === email.toLowerCase()
+            );
+
+            if (!user) {
+                return send(res, 404, {
+                    success: false,
+                    message: "Account not found."
+                });
+            }
+
+            const hashedPassword = crypto.scryptSync(
+                password,
+                user.salt,
+                64
+            ).toString("hex");
+
+            const passwordMatches = crypto.timingSafeEqual(
+                Buffer.from(hashedPassword, "hex"),
+                Buffer.from(user.password, "hex")
+            );
+
+            if (!passwordMatches) {
+                return send(res, 401, {
+                    success: false,
+                    message: "Incorrect password."
+                });
+            }
+
+            return send(res, 200, {
+                success: true,
+                message: "Login successful!",
+                name: user.name
+            });
+        }
+
+        // ADMIN STATISTICS
+        if (route === "/api/admin/stats" && req.method === "GET") {
+
+            const users = readJSON(usersFile);
+
+            return send(res, 200, {
+                students: users.length
+            });
+        }
+
+        // RESOURCES, GROUPS AND LOST ITEMS
+        const collection = routes[route];
+
+        if (collection) {
+
+            const data = readJSON(dataFile);
+
+            if (req.method === "GET") {
+                return send(res, 200, data[collection]);
+            }
+
+            if (req.method === "POST") {
+
+                const item = await readBody(req);
+
+                if (
+                    !item ||
+                    typeof item !== "object" ||
+                    Array.isArray(item)
+                ) {
+                    return send(res, 400, {
+                        message: "Invalid data."
+                    });
+                }
+
+                data[collection].push({
+                    ...item,
+                    id: crypto.randomUUID()
+                });
+
+                writeJSON(dataFile, data);
+
+                return send(res, 201, {
+                    message: "Data saved successfully!"
+                });
+            }
+
+            return send(res, 405, {
+                message: "Method not allowed."
+            });
+        }
+
+        // UNKNOWN ROUTE
+        return send(res, 404, {
+            message: "Route not found."
+        });
+
+    } catch (error) {
+
+        console.error("Backend error:", error);
+
+        if (!res.headersSent) {
+            return send(res, 500, {
+                message: "Internal server error."
+            });
+        }
     }
-
-    // Unknown routes
-    res.writeHead(404);
-    res.end(JSON.stringify({
-        message: "Route not found"
-    }));
-
 });
 
-server.listen(PORT, () => {
-    console.log(`CampusConnect running on port ${PORT}`);
+server.listen(PORT, "0.0.0.0", () => {
+    console.log("CampusConnect running on port " + PORT);
 });
